@@ -1,0 +1,22 @@
+{
+    "name": "cdutten/afip",
+    "description": "Library to make simpler the use of the SOAP services of Afip",
+    "type": "library",
+    "require-dev": {
+        "diversen/minimal-log": "^1.0",
+        "phpunit/phpunit": "^7.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Cesar Dutten",
+            "email": "cdutten@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Afip\\": "src/Afip"
+        }
+    }
+}
