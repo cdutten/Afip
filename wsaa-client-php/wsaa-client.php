@@ -8,13 +8,13 @@
 # Output:
 #        TA.xml: the authorization ticket as granted by WSAA.
 #==============================================================================
-define ("WSDL", "wsaa.wsdl");     # The WSDL corresponding to WSAA
-define ("CERT", "ghf.crt");       # The X.509 certificate in PEM format
-define ("PRIVATEKEY", "ghf.key"); # The private key correspoding to CERT (PEM)
+define ("WSDL", "wsaa-client-php/wsaa.wsdl");     # The WSDL corresponding to WSAA
+define ("CERT", "keys/wsaa-client-php/AfipTestPEM.crt");       # The X.509 certificate in PEM format
+define ("PRIVATEKEY", "keys/afipTest.key"); # The private key correspoding to CERT (PEM)
 define ("PASSPHRASE", "xxxxx"); # The passphrase (if any) to sign
 define ("PROXY_HOST", "10.20.152.112"); # Proxy IP, to reach the Internet
 define ("PROXY_PORT", "80");            # Proxy TCP port
-define ("URL", "https://wsaahomo.afip.gov.ar/ws/services/LoginCms");
+define ("URL", "https://wsaahomo.afip.gov.ar/ws/services/LoginCms?wsdl");
 #define ("URL", "https://wsaa.afip.gov.ar/ws/services/LoginCms");
 #------------------------------------------------------------------------------gs
 # You shouldn't have to change anything below this line!!!
@@ -30,7 +30,8 @@ function CreateTRA($SERVICE)
   $TRA->header->addChild('generationTime',date('c',date('U')-60));
   $TRA->header->addChild('expirationTime',date('c',date('U')+60));
   $TRA->addChild('service',$SERVICE);
-  $TRA->asXML('TRA.xml');
+  $TRA->asXML('keys/TRA.xml');
+  printf("Se genero el TRA\n");
 }
 #==============================================================================
 # This functions makes the PKCS#7 signature using TRA as input file, CERT and
@@ -43,36 +44,40 @@ function SignTRA()
     array(),
     !PKCS7_DETACHED
     );
-  if (!$STATUS) {exit("ERROR generating PKCS#7 signature\n");}
-  $inf=fopen("TRA.tmp", "r");
+  if (!$STATUS) {
+      exit("ERROR generating PKCS#7 signature\n");
+  }
+  $inf=fopen("keys/TRA.tmp", "r");
   $i=0;
   $CMS="";
-  while (!feof($inf)) 
-    { 
+  while (!feof($inf)) {
       $buffer=fgets($inf);
-      if ( $i++ >= 4 ) {$CMS.=$buffer;}
-    }
+      if ( $i++ >= 4 ) {
+          $CMS.=$buffer;
+      }
+  }
   fclose($inf);
 #  unlink("TRA.xml");
   unlink("TRA.tmp");
+  printf("Se genero el CMS\n");
   return $CMS;
 }
 #==============================================================================
 function CallWSAA($CMS)
 {
   $client=new SoapClient(WSDL, array(
-          'proxy_host'     => PROXY_HOST,
           'proxy_port'     => PROXY_PORT,
           'soap_version'   => SOAP_1_2,
           'location'       => URL,
           'trace'          => 1,
           'exceptions'     => 0
           )); 
-  $results=$client->loginCms(array('in0'=>$CMS));
+  $results = $client->loginCms(array('in0'=>$CMS));
   file_put_contents("request-loginCms.xml",$client->__getLastRequest());
   file_put_contents("response-loginCms.xml",$client->__getLastResponse());
-  if (is_soap_fault($results)) 
-    {exit("SOAP Fault: ".$results->faultcode."\n".$results->faultstring."\n");}
+  if (is_soap_fault($results)) {
+      exit("SOAP Fault: ".$results->faultcode."\n".$results->faultstring."\n");
+  }
   return $results->loginCmsReturn;
 }
 #==============================================================================
@@ -84,13 +89,22 @@ function ShowUsage($MyPath)
 }
 #==============================================================================
 ini_set("soap.wsdl_cache_enabled", "0");
-if (!file_exists(CERT)) {exit("Failed to open ".CERT."\n");}
-if (!file_exists(PRIVATEKEY)) {exit("Failed to open ".PRIVATEKEY."\n");}
-if (!file_exists(WSDL)) {exit("Failed to open ".WSDL."\n");}
-if ( $argc < 2 ) {ShowUsage($argv[0]); exit();}
+if (!file_exists(CERT)) {
+    exit("Failed to open ".CERT."\n");
+}
+if (!file_exists(PRIVATEKEY)) {
+    exit("Failed to open ".PRIVATEKEY."\n");
+}
+if (!file_exists(WSDL)) {
+    exit("Failed to open ".WSDL."\n");
+}
+if ( $argc < 2 ) {
+    ShowUsage($argv[0]); exit();
+}
 $SERVICE=$argv[1];
 CreateTRA($SERVICE);
 $CMS=SignTRA();
 $TA=CallWSAA($CMS);
-if (!file_put_contents("TA.xml", $TA)) {exit();}
-?>
+if (!file_put_contents("keys/TA.xml", $TA)) {
+    exit();
+}
