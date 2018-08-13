@@ -4,7 +4,7 @@
     "type": "library",
     "require-dev": {
         "diversen/minimal-log": "^1.0",
-        "phpunit/phpunit": "^7.3",
+        "phpunit/phpunit": "^7.3"
     },
     "license": "MIT",
     "authors": [
@@ -16,7 +16,7 @@
     "require": {
         "php": ">=5.6.0",
         "ext-openssl": "*",
-        "ext-soap": "*",
+        "ext-soap": "*"
     },
 
     "autoload": {
