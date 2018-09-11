@@ -14,8 +14,7 @@
         "php": ">=5.6.0",
         "ext-openssl": "*",
         "ext-soap": "*",
-        "ext-simplexml": "*",
-        "vlucas/phpdotenv": "^2.5"
+        "ext-simplexml": "*"
     },
     "require-dev": {
         "diversen/minimal-log": "^1.0",

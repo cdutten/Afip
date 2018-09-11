@@ -2,7 +2,6 @@
 
 namespace Afip;
 
-use Afip\Authenticator as Auth;
 
 class ServiceCaller
 {
@@ -10,21 +9,24 @@ class ServiceCaller
      * @var \SoapClient $client Client with the service
      */
     protected $client;
+    private $auth;
 
     /**
      * ServiceCaller constructor.
      *
-     * @param $service
+     * @param string $service
+     * @param AuthenticatorInterface $auth
      */
-    public function __construct($service)
+    public function __construct($service, AuthenticatorInterface $auth)
     {
+        $this->auth = $auth;
         $this->client = new \SoapClient($service);
-        return $this;
     }
 
     public function __call($name, $arguments)
     {
-        $arguments = array_merge(Auth::getCredentials(), $arguments);
+        $credentials = $this->auth->getCredentials();
+        $arguments = array_merge($credentials, $arguments);
         return $this->client->$name($arguments);
     }
 }
