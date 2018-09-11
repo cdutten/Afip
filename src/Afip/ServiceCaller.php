@@ -12,18 +12,19 @@ class ServiceCaller
     protected $client;
 
     /**
-     * padronA4 constructor.
+     * ServiceCaller constructor.
      *
      * @param $service
      */
     public function __construct($service)
     {
         $this->client = new \SoapClient($service);
+        return $this;
     }
 
     public function __call($name, $arguments)
     {
-           $arguments = array_merge(Auth::getCredentials(), $arguments);
-        $this->client->$name($arguments);
+        $arguments = array_merge(Auth::getCredentials(), $arguments);
+        return $this->client->$name($arguments);
     }
 }

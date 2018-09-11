@@ -8,8 +8,8 @@
 #        TA.xml: the authorization ticket as granted by WSAA.
 #==============================================================================
 define("WSDL", "wsaa.wsdl");     # The WSDL corresponding to WSAA
-define("CERT", "../keys/AfipTestPEM.crt");       # The X.509 certificate in PEM format
-define("PRIVATEKEY", "../keys/afipTest.key"); # The private key correspoding to CERT (PEM)
+define("CERT", "../storage/keys/AfipTestPEM.crt");       # The X.509 certificate in PEM format
+define("PRIVATEKEY", "../storage/keys/afipTest.key"); # The private key correspoding to CERT (PEM)
 define("PASSPHRASE", "xxxxx"); # The passphrase (if any) to sign
 define("PROXY_HOST", "10.20.152.112"); # Proxy IP, to reach the Internet
 define("PROXY_PORT", "80");            # Proxy TCP port
@@ -30,7 +30,7 @@ function CreateTRA($SERVICE)
       $TRA->header->addChild('generationTime', date('c', date('U')-60));
       $TRA->header->addChild('expirationTime', date('c', date('U')+60));
       $TRA->addChild('service', $SERVICE);
-      $TRA->asXML('../keys/TRA.xml');
+      $TRA->asXML('../storage/keys/TRA.xml');
       printf("Se genero el TRA\n");
 }
 #==============================================================================
@@ -39,18 +39,18 @@ function CreateTRA($SERVICE)
 # MIME heading leaving the final CMS required by WSAA.
 function SignTRA()
 {
-    $STATUS=openssl_pkcs7_sign(
-        "../keys/TRA.xml",
-        "../keys/TRA.tmp",
+    $status=openssl_pkcs7_sign(
+        "../storage/keys/TRA.xml",
+        "../storage/keys/TRA.tmp",
         "file://".CERT,
         array("file://".PRIVATEKEY, PASSPHRASE),
         array(),
         !PKCS7_DETACHED
     );
-    if (!$STATUS) {
+    if (!$status) {
         exit("ERROR generating PKCS#7 signature\n");
     }
-    $inf=fopen("../keys/TRA.tmp", "r");
+    $inf=fopen("../storage/keys/TRA.tmp", "r");
     $i=0;
     $CMS="";
     while (!feof($inf)) {
@@ -61,7 +61,7 @@ function SignTRA()
     }
     fclose($inf);
     #  unlink("TRA.xml");
-    unlink("../keys/TRA.tmp");
+    unlink("../storage/keys/TRA.tmp");
     printf("Se genero el CMS\n");
     return $CMS;
 }
@@ -77,8 +77,8 @@ function CallWSAA($CMS)
         'exceptions'     => 0]
     );
     $results = $client->loginCms(array('in0'=>$CMS));
-    file_put_contents("../keys/request-loginCms.xml", $client->__getLastRequest());
-    file_put_contents("../keys/response-loginCms.xml", $client->__getLastResponse());
+    file_put_contents("../storage/keys/request-loginCms.xml", $client->__getLastRequest());
+    file_put_contents("../storage/keys/response-loginCms.xml", $client->__getLastResponse());
     if (is_soap_fault($results)) {
         exit("SOAP Fault: ".$results->faultcode."\n".$results->faultstring."\n");
     }
@@ -110,6 +110,6 @@ $SERVICE=$argv[1];
 CreateTRA($SERVICE);
 $CMS=SignTRA();
 $TA=CallWSAA($CMS);
-if (!file_put_contents("../keys/TA.xml", $TA)) {
+if (!file_put_contents("../storage/keys/TA.xml", $TA)) {
     exit();
 }

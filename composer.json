@@ -2,10 +2,7 @@
     "name": "cdutten/afip",
     "description": "Library to make simpler the use of the SOAP services of Afip",
     "type": "library",
-    "require-dev": {
-        "diversen/minimal-log": "^1.0",
-        "phpunit/phpunit": "^7.3"
-    },
+
     "license": "MIT",
     "authors": [
         {
@@ -16,7 +13,14 @@
     "require": {
         "php": ">=5.6.0",
         "ext-openssl": "*",
-        "ext-soap": "*"
+        "ext-soap": "*",
+        "ext-simplexml": "*",
+        "vlucas/phpdotenv": "^2.5"
+    },
+    "require-dev": {
+        "diversen/minimal-log": "^1.0",
+        "phpunit/phpunit": "^7.3",
+        "squizlabs/php_codesniffer": "^3.3"
     },
 
     "autoload": {
