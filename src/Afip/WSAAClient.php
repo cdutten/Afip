@@ -52,9 +52,9 @@ class WSAAClient
 
     public function generateTA()
     {
-        $this->createTRA();
-        $this->signTRA();
-        $this->callWSAA();
+        $this->createTRA()
+             ->signTRA()
+             ->callWSAA();
 
         return $this;
     }
@@ -73,6 +73,11 @@ class WSAAClient
         return $this;
     }
 
+    /**
+     * @return $this
+     *
+     * @throws Exception
+     */
     private function signTRA()
     {
 
@@ -82,7 +87,7 @@ class WSAAClient
             "file://" . $this->cert,
             array("file://" . $this->privatekey, $this->passphrare),
             array(),
-            !PKCS7_DETACHED
+            false
         );
         if (!$status) {
             throw new Exception('ERROR generating PKCS#7 signature');
@@ -98,7 +103,6 @@ class WSAAClient
         }
         fclose($inf);
         unlink($this->path . '/' . $this->service . '_TRA.tmp');
-        printf("Se genero el CMS\n");
         $this->cms = $CMS;
         return $this;
     }
@@ -107,7 +111,7 @@ class WSAAClient
     {
         try {
             $client = new SoapClient(
-                './wsaa.wsdl',
+                __DIR__ . '/wsaa.wsdl',
                 ['proxy_port' => $this->proxyPort,
                     'soap_version' => SOAP_1_2,
                     'location' => $this->url,
@@ -115,13 +119,18 @@ class WSAAClient
                     'exceptions' => 1]
             );
             $results = $client->loginCms(array('in0' => $this->cms));
-            file_put_contents($this->path . '/' . $this->service . "_request-loginCms.xml", $client->__getLastRequest());
-            file_put_contents($this->path . '/' . $this->service . "_response-loginCms.xml", $client->__getLastResponse());
-            if (is_soap_fault($results)) {
-                throw new Exception("SOAP Fault: " . $results->faultcode . ', ' . $results->faultstring);
-            }
-
-            file_put_contents($this->path . '/' . $this->service . "_TA.xml", $results->loginCmsReturn);
+            file_put_contents(
+                $this->path . '/' . $this->service . "_request-loginCms.xml",
+                $client->__getLastRequest()
+            );
+            file_put_contents(
+                $this->path . '/' . $this->service . "_response-loginCms.xml",
+                $client->__getLastResponse()
+            );
+            file_put_contents(
+                $this->path . '/' . $this->service . "_TA.xml",
+                $results->loginCmsReturn
+            );
 
         } catch (\Exception $e) {
             throw new Exception('SoapClient Exception: ' . $e->getMessage());

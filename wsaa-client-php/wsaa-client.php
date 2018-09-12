@@ -8,7 +8,7 @@
 #        TA.xml: the authorization ticket as granted by WSAA.
 #==============================================================================
 define("WSDL", "wsaa.wsdl");     # The WSDL corresponding to WSAA
-define("CERT", "../storage/keys/AfipTestPEM.crt");       # The X.509 certificate in PEM format
+define("CERT", "../storage/keys/ws_sr_padron_a4.crt");       # The X.509 certificate in PEM format
 define("PRIVATEKEY", "../storage/keys/afipTest.key"); # The private key correspoding to CERT (PEM)
 define("PASSPHRASE", "xxxxx"); # The passphrase (if any) to sign
 define("PROXY_HOST", "10.20.152.112"); # Proxy IP, to reach the Internet
