@@ -19,11 +19,4 @@ class AuthenticatorTest extends TestCase
         $this->assertArrayHasKey('cuitRepresentada', $credentials);
         $this->assertSame(11, strlen($credentials['cuitRepresentada']));
     }
-
-    /*public function testParserCuit()
-    {
-        $wsaaClient = new WSAAClient('ws_sr_padron_a4', '../storage/keys/');
-        $auth = new Authenticator('../storage/keys/TA.xml', $wsaaClient);
-        $credentials = $auth->getCredentials();
-    }*/
 }
