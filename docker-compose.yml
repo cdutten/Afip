@@ -1,0 +1,9 @@
+version: '2'
+services:
+  afip:
+    build: ./
+    volumes:
+    - "./:/var/www/html"
+    - "${SECRET_PATH}:/secret"
+    ports:
+    - "9000:9000"

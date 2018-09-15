@@ -5,6 +5,10 @@ namespace Afip;
 use SimpleXMLElement;
 use SoapClient;
 
+/**
+ * Class WSAAClient
+ * @package Afip
+ */
 class WSAAClient
 {
     /** @var string */
@@ -26,41 +30,77 @@ class WSAAClient
     /** @var string */
     private $cms;
 
+    /**
+     * WSAAClient constructor.
+     * @param $service
+     * @param $path
+     * @param string $url
+     * @param string $passphrare
+     * @param string $proxyHost
+     * @param string $proxyPort
+     * @throws Exception
+     */
     public function __construct(
         $service,
         $path,
-        $url = 'https://wsaahomo.afip.gov.ar/ws/services/LoginCms?wsdl',
+        $url = 'https://wsaahomo.afip.gov.ar',
         $passphrare = 'xxxxx',
         $proxyHost = '10.20.152.112',
         $proxyPort = '80')
     {
 
+        if (!is_dir($path)) {
+            throw new Exception('El path no se encuentra, utilice path absoluto, path: ' . $path);
+        }
+
+        $crt = $path . '/' . $service . '.crt';
+        $key = $path . '/' . $service . '.key';
+
+        if (!is_file($path . '/' . $service . '.crt')) {
+            throw new Exception('El archivo certificado no se encuentra, utilice path absoluto, path: ' . $crt);
+        }
+
+        if (!is_file($path . '/' . $service . '.key')) {
+            throw new Exception('El archivo key no se encuentra, utilice path absoluto, path: ' . $key);
+        }
+
         $this->service = $service;
         $this->path = $path;
-        $this->cert = $path . '/' . $service . '.crt';
-        $this->privatekey = $path . '/' . $service . '.key';
+        $this->cert = $crt;
+        $this->privatekey = $key;
         $this->passphrare = $passphrare;
         $this->proxyHost = $proxyHost;
         $this->proxyPort = $proxyPort;
-        $this->url = $url;
+        $this->url = $url . '/ws/services/LoginCms?wsdl';
     }
 
+    /**
+     * @return string
+     */
     public function getService()
     {
         return $this->service;
     }
 
+    /**
+     * @return $this
+     * @throws Exception
+     */
     public function generateTA()
     {
         $this->createTRA()
-             ->signTRA()
-             ->callWSAA();
+            ->signTRA()
+            ->callWSAA();
 
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     private function createTRA()
     {
+        echo PHP_EOL . "createTRA" . PHP_EOL;
         $xml = '<?xml version="1.0" encoding="UTF-8"?><loginTicketRequest version="1.0"></loginTicketRequest>';
         $tra = new SimpleXMLElement($xml);
         $tra->addChild('header');
@@ -68,7 +108,7 @@ class WSAAClient
         $tra->header->addChild('generationTime', date('c', date('U') - 60));
         $tra->header->addChild('expirationTime', date('c', date('U') + 60));
         $tra->addChild('service', $this->service);
-        $tra->asXML($this->path . '/' . $this->service . '_TRA.xml');
+        $xml = $tra->asXML($this->path . '/' . $this->service . '_TRA.xml');
 
         return $this;
     }
@@ -80,7 +120,7 @@ class WSAAClient
      */
     private function signTRA()
     {
-
+        echo "signTRA" . PHP_EOL;
         $status = openssl_pkcs7_sign(
             $this->path . '/' . $this->service . '_TRA.xml',
             $this->path . '/' . $this->service . '_TRA.tmp',
@@ -107,8 +147,13 @@ class WSAAClient
         return $this;
     }
 
+    /**
+     * @return $this
+     * @throws Exception
+     */
     private function callWSAA()
     {
+        echo "callWSAA" . PHP_EOL;
         try {
             $client = new SoapClient(
                 __DIR__ . '/wsaa.wsdl',
@@ -133,11 +178,9 @@ class WSAAClient
             );
 
         } catch (\Exception $e) {
-            throw new Exception('SoapClient Exception: ' . $e->getMessage());
+            throw new Exception('SoapClient Exception: ' . $e->getMessage() . ' exception:' . get_class($e));
         }
 
         return $this;
     }
-
-
 }

@@ -20,13 +20,17 @@ class Authenticator implements AuthenticatorInterface
      * @param $path
      * @param WSAAClient $wssaClient
      *
-     * @return void
+     * @throws Exception
      */
     public function __construct($path, WSAAClient $wssaClient)
     {
+        if(!is_dir($path)){
+            throw new Exception('El path no se encuentra, utilice path absoluto, path: ' . $path);
+        }
+
+        $this->service = $wssaClient->getService();
         $this->path = $path;
         $this->wssaClient = $wssaClient;
-        $this->service = $wssaClient->getService();
         $this->loadCredentials();
     }
 
@@ -40,11 +44,12 @@ class Authenticator implements AuthenticatorInterface
      */
     protected function loadCredentials()
     {
-        if (!file_exists($this->path . '/' . $this->service . '_TA.xml')) {
+        if (!file_exists($this->path . $this->service . '_TA.xml')) {
+            throw new \Exception('NO encontro el TA: '. $this->path  . $this->service . '_TA.xml');
             $this->wssaClient->generateTA();
         }
         $taXml = simplexml_load_file($this->path . '/' . $this->service . '_TA.xml');
-        $this->credentials = (array) $taXml->credentials;
+        $this->credentials = (array)$taXml->credentials;
         $this->credentials['cuitRepresentada'] = $this->parserCuit($taXml);
     }
 
@@ -69,9 +74,9 @@ class Authenticator implements AuthenticatorInterface
      */
     private function parserCuit(SimpleXMLElement $taXml)
     {
-        $destination = (string) $taXml->header->destination;
+        $destination = (string)$taXml->header->destination;
         preg_match("/\d+/", $destination, $match);
-        if (! $match) {
+        if (!$match) {
             throw new Exception('Can\'t get the Cuit from TA');
         }
         return $match[0];
