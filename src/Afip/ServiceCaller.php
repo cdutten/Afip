@@ -2,7 +2,10 @@
 
 namespace Afip;
 
-
+/**
+ * Class ServiceCaller
+ * @package Afip
+ */
 class ServiceCaller
 {
     /**
@@ -26,7 +29,7 @@ class ServiceCaller
     public function __call($name, $arguments)
     {
         $credentials = $this->auth->getCredentials();
-        $arguments = array_merge($credentials, $arguments);
+        $arguments = array_merge($credentials, $arguments[0]);
         return $this->client->$name($arguments);
     }
 }

@@ -8,11 +8,13 @@ use PHPUnit\Framework\TestCase;
 
 class AuthenticatorTest extends TestCase
 {
-
+    /**
+     * @throws \Afip\Exception
+     */
     public function testGetCredentials()
     {
-        $wsaaClient = new WSAAClient('ws_sr_padron_a4', '../storage/keys/');
-        $auth = new Authenticator('../storage/keys/', $wsaaClient);
+        $wsaaClient = new WSAAClient('ws_sr_padron_a4', __DIR__ . '/../secret/ws_sr_padron_a4/');
+        $auth = new Authenticator(__DIR__ . '/../secret/ws_sr_padron_a4/', $wsaaClient);
         $credentials = $auth->getCredentials();
         $this->assertArrayHasKey('token', $credentials);
         $this->assertArrayHasKey('sign', $credentials);
