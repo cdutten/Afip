@@ -19,6 +19,7 @@ class ServiceCaller
      *
      * @param string $service
      * @param AuthenticatorInterface $auth
+     *
      */
     public function __construct($service, AuthenticatorInterface $auth)
     {
@@ -26,9 +27,22 @@ class ServiceCaller
         $this->client = new \SoapClient($service);
     }
 
+    /**
+     * Magic method call
+     *
+     * @param string $name
+     * @param array $arguments
+     *
+     * @return mixed
+     *
+     * @throws \SoapFault
+     */
     public function __call($name, $arguments)
     {
         $credentials = $this->auth->getCredentials();
+        if (empty($arguments)) {
+            $arguments[0] = [];
+        }
         $arguments = array_merge($credentials, $arguments[0]);
         return $this->client->$name($arguments);
     }

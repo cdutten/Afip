@@ -20,7 +20,7 @@ class WSAAClient
     /** @var string */
     private $path;
     /** @var string */
-    private $passphrare;
+    private $passPhrase;
     /** @var string */
     private $proxyHost;
     /** @var string */
@@ -35,7 +35,7 @@ class WSAAClient
      * @param $service
      * @param $path
      * @param string $url
-     * @param string $passphrare
+     * @param string $passPhrase
      * @param string $proxyHost
      * @param string $proxyPort
      * @throws Exception
@@ -44,10 +44,10 @@ class WSAAClient
         $service,
         $path,
         $url = 'https://wsaahomo.afip.gov.ar',
-        $passphrare = 'xxxxx',
+        $passPhrase = 'xxxxx',
         $proxyHost = '10.20.152.112',
-        $proxyPort = '80')
-    {
+        $proxyPort = '80'
+    ) {
 
         if (!is_dir($path)) {
             throw new Exception('El path no se encuentra, utilice path absoluto, path: ' . $path);
@@ -68,7 +68,7 @@ class WSAAClient
         $this->path = $path;
         $this->cert = $crt;
         $this->privatekey = $key;
-        $this->passphrare = $passphrare;
+        $this->passPhrase = $passPhrase;
         $this->proxyHost = $proxyHost;
         $this->proxyPort = $proxyPort;
         $this->url = $url . '/ws/services/LoginCms?wsdl';
@@ -108,7 +108,7 @@ class WSAAClient
         $tra->header->addChild('generationTime', date('c', date('U') - 60));
         $tra->header->addChild('expirationTime', date('c', date('U') + 60));
         $tra->addChild('service', $this->service);
-        $xml = $tra->asXML($this->path . '/' . $this->service . '_TRA.xml');
+        $tra->asXML($this->path . '/' . $this->service . '_TRA.xml');
 
         return $this;
     }
@@ -125,7 +125,7 @@ class WSAAClient
             $this->path . '/' . $this->service . '_TRA.xml',
             $this->path . '/' . $this->service . '_TRA.tmp',
             "file://" . $this->cert,
-            array("file://" . $this->privatekey, $this->passphrare),
+            array("file://" . $this->privatekey, $this->passPhrase),
             array(),
             false
         );

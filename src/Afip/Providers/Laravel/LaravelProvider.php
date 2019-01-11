@@ -21,7 +21,14 @@ abstract class LaravelProvider extends ServiceProvider implements AfipLaravelPro
         $this->app->singleton($service, function ($app) use ($service) {
             $afip = config('app.afip');
             $path = $afip['path'] . '/' . $service;
-            $wsaaClient = new WSAAClient($service, $path, $afip['url'], $afip['passphrare'], $afip['host'], $afip['port']);
+            $wsaaClient = new WSAAClient(
+                $service,
+                $path,
+                $afip['url'],
+                $afip['passPhrase'],
+                $afip['host'],
+                $afip['port']
+            );
             $auth = new Authenticator($service, $wsaaClient);
             $url = $afip['url'] . $this->getWsdlServicePath();
             return new ServiceCaller($url, $auth);

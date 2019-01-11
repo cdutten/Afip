@@ -42,11 +42,11 @@ $cuit = $argv[2];
 $service = 'ws_sr_padron_a4';
 $url = 'https://wsaahomo.afip.gov.ar/ws/services/LoginCms?wsdl';
 $wsd = 'https://awshomo.afip.gov.ar/sr-padron/webservices/personaServiceA4?WSDL';
-$passphrare = 'xxxxx';
+$passPhrase = 'xxxxx';
 $host = '10.20.152.112';
 $port = '80';
 try {
-    $wsaa = new \Afip\WSAAClient($service, $path, $url, $passphrare, $host, $port);
+    $wsaa = new \Afip\WSAAClient($service, $path, $url, $passPhrase, $host, $port);
     $auth = new \Afip\Authenticator($path, $wsaa);
     $service = new \Afip\ServiceCaller($wsd, $auth);
     var_dump($service->getPersona(['idPersona'=>$cuit]) );
@@ -73,10 +73,10 @@ AFIP_KEY_PATH=~/secret-keys
 
 ##### config/afip.php
 ```
-retrun [
+return [
    'path' => env('AFIP_KEY_PATH', storage_path('/secret')),
    'url' => env('AFIP_URL', 'https://wsaahomo.afip.gov.ar'),
-   'passphrare' => env('AFIP_PASSPHRARE', 'xxxxx'),
+   'passPhrase' => env('AFIP_PASS_PHRASE', 'xxxxx'),
    'host' => env('AFIP_PROXY_HOST', '10.20.152.112'),
    'port' => env('AFIP_PROXY_PORT', '80'),
 ]
@@ -109,7 +109,7 @@ Ejecución:
 ~local$: docker-compose exec afip bash
 ~docker-afip$ composer install
 ~docker-afip$ ./vendor/bin/phpunit test
-~docker-afip$ get-persona.php $PWD/secret/ws_sr_padron_a4 tuCuit
+~docker-afip$ php get-persona.php $PWD/secret/ws_sr_padron_a4 tuCuit
 ```
 
 
