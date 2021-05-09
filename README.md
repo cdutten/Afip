@@ -1,3 +1,7 @@
+## Deprecado
+El servicio para hacer estas consultas ha sido deprecado por Afip.
+Por lo cual este wrapper ya no funciona. 😓
+
 ##  Collaborators
 
 * [cdutten](https://github.com/cdutten)
